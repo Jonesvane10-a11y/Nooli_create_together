@@ -1,0 +1,1057 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Noolie — Create together, grow together</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-app: #F8F9FA;
+      --bg-surface: #FFFFFF;
+      --bg-subtle: #F1F3F5;
+      --text-primary: #111827;
+      --text-secondary: #6B7280;
+      --border-subtle: rgba(0, 0, 0, 0.06);
+      --violet-tint: rgba(139, 92, 246, 0.11);
+      --violet-border: rgba(139, 92, 246, 0.20);
+      --violet-solid: rgba(139, 92, 246, 0.88);
+      --violet-text: #5B21B6;
+      --easing-fluid: cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    body.dark-theme {
+      --bg-app: #0F1115;
+      --bg-surface: #181B22;
+      --bg-subtle: #222630;
+      --text-primary: #F9FAFB;
+      --text-secondary: #9CA3AF;
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --violet-tint: rgba(139, 92, 246, 0.20);
+      --violet-border: rgba(139, 92, 246, 0.32);
+      --violet-solid: rgba(139, 92, 246, 0.88);
+      --violet-text: #DDD6FE;
+    }
+    /* Capsules flottantes (verre dépoli blanc neutre et pur) */
+    .glass-capsule {
+      background: rgba(255, 255, 255, 0.88);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid rgba(0, 0, 0, 0.06);
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.04);
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      background-color: var(--bg-app);
+      color: var(--text-primary);
+      overflow: hidden;
+      transition: background-color 0.35s var(--easing-fluid), color 0.35s var(--easing-fluid);
+    }
+
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+    /* Surfaces ultra-pures */
+    .pure-surface {
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      transition: background-color 0.35s var(--easing-fluid), border-color 0.35s var(--easing-fluid), transform 0.2s var(--easing-fluid);
+    }
+
+    /* Capsules flottantes (verre dépoli neutre) */
+    .glass-capsule {
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(22px);
+      -webkit-backdrop-filter: blur(22px);
+      border: 1px solid rgba(17, 24, 39, 0.06);
+      box-shadow: 0 8px 28px rgba(17, 24, 39, 0.04);
+    }
+
+    body.dark-theme .glass-capsule {
+      background: rgba(24, 27, 34, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.25);
+    }
+
+    /* ACCENT VIOLET 1 : Bulle de l'utilisateur uniquement */
+    .user-bubble {
+      background: var(--violet-tint);
+      border: 1px solid var(--violet-border);
+      color: var(--violet-text);
+    }
+
+    /* Bulle de Mochi (Neutre pur) */
+    .ai-bubble {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-primary);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+    }
+
+    /* ACCENT VIOLET 2 : Boutons d'action principaux (Envoyer / Micro actif) */
+    .violet-action-btn {
+      background: var(--violet-solid);
+      color: #FFFFFF;
+      box-shadow: 0 4px 12px rgba(124, 58, 237, 0.22);
+      transition: transform 0.18s var(--easing-fluid), opacity 0.18s ease;
+    }
+    .violet-action-btn:active {
+      transform: scale(0.92);
+    }
+
+    /* ACCENT VIOLET 3 : Onglet actif uniquement */
+    .nav-item {
+      color: var(--text-secondary);
+      transition: all 0.28s var(--easing-fluid);
+    }
+    .nav-item.active {
+      background: var(--violet-tint);
+      color: var(--violet-text);
+    }
+
+    /* Transitions fluides des vues */
+    .tab-view {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(8px) scale(0.99);
+      transition: opacity 0.32s var(--easing-fluid), transform 0.32s var(--easing-fluid);
+    }
+    .tab-view.active {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateY(0) scale(1);
+    }
+
+    /* Animations organiques de Mochi */
+    @keyframes mochiBreathe {
+      0%, 100% { transform: translateY(0px) scale(1); }
+      50% { transform: translateY(-4px) scale(1.02); }
+    }
+    @keyframes mochiSpeak {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.07) translateY(-3px); }
+    }
+    @keyframes blinkEyes {
+      0%, 94%, 100% { transform: scaleY(1); }
+      97% { transform: scaleY(0.1); }
+    }
+    @keyframes msgSlideIn {
+      from { opacity: 0; transform: translateY(10px) scale(0.98); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    @keyframes typingDot {
+      0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+      40% { transform: scale(1); opacity: 1; }
+    }
+    @keyframes wavePulse {
+      0%, 100% { height: 5px; }
+      50% { height: 18px; }
+    }
+
+    .mochi-idle { animation: mochiBreathe 3.8s ease-in-out infinite; }
+    .mochi-speaking { animation: mochiSpeak 0.55s ease-in-out infinite; }
+    .mochi-eyes { transform-origin: center; animation: blinkEyes 4.5s infinite; }
+    .msg-enter { animation: msgSlideIn 0.3s var(--easing-fluid) forwards; }
+
+    .typing-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 9999px;
+      background-color: var(--text-secondary);
+      animation: typingDot 1.2s infinite ease-in-out;
+    }
+    .typing-dot:nth-child(2) { animation-delay: 0.16s; }
+    .typing-dot:nth-child(3) { animation-delay: 0.32s; }
+
+    .wave-bar {
+      width: 2.5px;
+      border-radius: 9999px;
+      background-color: #6B7280;
+      animation: wavePulse 0.75s ease-in-out infinite;
+    }
+    .wave-bar:nth-child(2) { animation-delay: 0.15s; }
+    .wave-bar:nth-child(3) { animation-delay: 0.3s; }
+    .wave-bar:nth-child(4) { animation-delay: 0.45s; }
+  </style>
+</head>
+<body class="flex flex-col h-screen w-screen overflow-hidden select-none">
+
+  <!-- EN-TÊTE MINIMALISTE SANS CADRE -->
+  <header class="w-full px-5 pt-4 pb-2 flex items-center justify-between z-20 shrink-0">
+    <div class="flex items-center gap-3">
+      <!-- Avatar Mochi ultra-épuré -->
+      <div id="headerMochi" onclick="triggerMochiQuickVoice()" class="w-9 h-9 rounded-full pure-surface flex items-center justify-center cursor-pointer mochi-idle shadow-2xs">
+        <svg class="w-6 h-6" viewBox="0 0 100 100" fill="none">
+          <path d="M28 36 C20 18, 36 16, 42 30 Z" fill="#F3F4F6" stroke="#374151" stroke-width="3" stroke-linejoin="round"/>
+          <path d="M72 36 C80 18, 64 16, 58 30 Z" fill="#F3F4F6" stroke="#374151" stroke-width="3" stroke-linejoin="round"/>
+          <rect x="20" y="26" width="60" height="52" rx="26" fill="#FFFFFF" stroke="#374151" stroke-width="3"/>
+          <g class="mochi-eyes">
+            <circle cx="38" cy="49" r="3.8" fill="#111827"/>
+            <circle cx="62" cy="49" r="3.8" fill="#111827"/>
+          </g>
+          <path d="M45 58 Q50 62 55 58" stroke="#374151" stroke-width="2.8" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div>
+        <div class="flex items-center gap-1.5">
+          <h1 class="text-[15px] font-semibold tracking-tight">Mochi</h1>
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+        </div>
+        <p id="headerStatus" class="text-[11px]" style="color: var(--text-secondary);">Compagnon Noolie • Disponible</p>
+      </div>
+    </div>
+
+    <!-- Bouton Appel Vocal Neutre & Épuré -->
+    <button onclick="openCallOverlay('Mochi', true)" class="pure-surface px-3.5 py-2 rounded-full flex items-center gap-2 text-xs font-medium active:scale-95">
+      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" />
+      </svg>
+      <span>Appeler</span>
+    </button>
+  </header>
+
+  <!-- CONTENEUR PRINCIPAL DES 5 VUES -->
+  <main class="flex-1 relative w-full overflow-hidden">
+
+    <!-- ==================== 1. ONGLET CHAT ==================== -->
+    <section id="view-chat" class="tab-view active flex flex-col justify-between">
+      <div id="chatStream" class="flex-1 overflow-y-auto no-scrollbar px-5 pt-2 pb-44 space-y-4">
+        
+        <!-- Présence centrale organique et épurée de Mochi -->
+        <div class="flex flex-col items-center text-center pt-1 pb-2">
+          <div id="heroMochi" onclick="triggerMochiQuickVoice()" class="w-16 h-16 rounded-full pure-surface flex items-center justify-center cursor-pointer mochi-idle shadow-2xs mb-2.5">
+            <svg class="w-10 h-10" viewBox="0 0 100 100" fill="none">
+              <path d="M28 36 C20 18, 36 16, 42 30 Z" fill="#F1F3F5" stroke="#374151" stroke-width="2.8" stroke-linejoin="round"/>
+              <path d="M72 36 C80 18, 64 16, 58 30 Z" fill="#F1F3F5" stroke="#374151" stroke-width="2.8" stroke-linejoin="round"/>
+              <rect x="20" y="26" width="60" height="52" rx="26" fill="#FFFFFF" stroke="#374151" stroke-width="2.8"/>
+              <g class="mochi-eyes">
+                <circle cx="38" cy="49" r="3.8" fill="#111827"/>
+                <circle cx="62" cy="49" r="3.8" fill="#111827"/>
+              </g>
+              <path d="M44 58 Q50 63 56 58" stroke="#374151" stroke-width="2.8" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <p class="text-xs font-medium" style="color: var(--text-secondary);">Touche Mochi pour l'écouter • Espace minimaliste</p>
+        </div>
+
+        <!-- Capsule de contexte neutre -->
+        <div class="pure-surface rounded-2xl p-3.5 flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm" style="background-color: var(--bg-subtle);">
+              ✦
+            </div>
+            <div>
+              <p class="text-xs font-semibold">Briefing du jour</p>
+              <p class="text-[11px]" style="color: var(--text-secondary);">2 messages de Sarah • 1 idée dans Studio Noolie</p>
+            </div>
+          </div>
+          <button onclick="sendQuickPrompt('Fais-moi mon briefing détaillé')" class="text-xs font-medium px-3 py-1.5 rounded-full active:scale-95 transition" style="background-color: var(--bg-subtle);">
+            Lire
+          </button>
+        </div>
+
+        <!-- Messages -->
+        <div id="messagesContainer" class="space-y-3">
+          <div class="flex justify-start msg-enter">
+            <div class="ai-bubble rounded-2xl rounded-tl-sm px-4 py-3 max-w-[84%] text-[14px] leading-relaxed">
+              Bonjour ! Ton espace est prêt. Sur quoi veux-tu avancer aujourd'hui — une idée créative, un message à Sarah ou une discussion vocale ?
+            </div>
+          </div>
+        </div>
+
+        <!-- Indicateur de frappe fluide (masqué par défaut) -->
+        <div id="typingIndicator" class="hidden flex justify-start msg-enter">
+          <div class="ai-bubble rounded-2xl rounded-tl-sm px-4 py-3 flex items-center gap-1.5">
+            <span class="typing-dot"></span>
+            <span class="typing-dot"></span>
+            <span class="typing-dot"></span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Suggestions rapides fluides + Barre de saisie flottante -->
+      <div class="fixed bottom-20 left-0 right-0 px-4 z-20 space-y-2.5 pointer-events-none">
+        
+        <!-- Pilules de suggestions contextuelles -->
+        <div id="quickPills" class="flex items-center gap-2 overflow-x-auto no-scrollbar max-w-lg mx-auto pointer-events-auto pb-0.5">
+          <button onclick="sendQuickPrompt('Donne-moi une idée créative')" class="pure-surface px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap active:scale-95">
+            💡 Idée créative
+          </button>
+          <button onclick="sendQuickPrompt('Écris un message à Sarah')" class="pure-surface px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap active:scale-95">
+            ✉️ Message à Sarah
+          </button>
+          <button onclick="sendQuickPrompt('Comment je me sens aujourd’hui ?')" class="pure-surface px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap active:scale-95">
+            🌿 Point humeur
+          </button>
+          <button onclick="sendQuickPrompt('Résume mes tâches')" class="pure-surface px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap active:scale-95">
+            📋 Mes tâches
+          </button>
+        </div>
+
+        <!-- Capsule de saisie flottante -->
+        <div class="glass-capsule rounded-full p-1.5 flex items-center gap-2 max-w-lg mx-auto pointer-events-auto">
+          
+          <!-- Mode Texte -->
+          <div id="textBar" class="flex-1 flex items-center gap-2 pl-3.5">
+            <input id="messageInput" type="text" placeholder="Écrire à Mochi..." class="w-full bg-transparent text-sm focus:outline-none" onkeypress="if(event.key==='Enter') handleSendText()" />
+            
+            <!-- Bouton Micro -->
+            <button onclick="startRecording()" aria-label="Enregistrer un vocal" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-white/10 transition active:scale-90" style="color: var(--text-secondary);">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.9" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V4.5a3 3 0 116 0v8.25a3 3 0 01-3 3z" />
+              </svg>
+            </button>
+
+            <!-- Bouton Envoyer (Accent Violet) -->
+            <button onclick="handleSendText()" aria-label="Envoyer" class="violet-action-btn w-9 h-9 rounded-full flex items-center justify-center shrink-0">
+              <svg class="w-4 h-4 translate-x-0.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
+              </svg>
+            </button>
+          </div>
+
+          <!-- Mode Enregistrement Vocal -->
+          <div id="voiceBar" class="hidden flex-1 flex items-center justify-between pl-3 pr-1">
+            <button onclick="cancelRecording()" class="text-xs font-medium px-2 py-1" style="color: var(--text-secondary);">
+              Annuler
+            </button>
+
+            <div class="flex items-center gap-2.5">
+              <span class="w-2 h-2 rounded-full bg-red-500 animate-ping"></span>
+              <span id="timerLabel" class="text-xs font-semibold tabular-nums">0:01</span>
+              <div class="flex items-center gap-1 h-4">
+                <div class="wave-bar"></div>
+                <div class="wave-bar"></div>
+                <div class="wave-bar"></div>
+                <div class="wave-bar"></div>
+              </div>
+            </div>
+
+            <button onclick="finishRecording()" class="violet-action-btn px-3.5 py-2 rounded-full text-xs font-medium">
+              Envoyer
+            </button>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== 2. ONGLET GROUPES ==================== -->
+    <section id="view-groups" class="tab-view overflow-y-auto no-scrollbar px-5 pt-2 pb-28 space-y-4">
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="text-lg font-bold tracking-tight">Groupes</h2>
+          <p class="text-xs" style="color: var(--text-secondary);">Espaces partagés avec Mochi</p>
+        </div>
+        <button onclick="addNewGroup()" class="pure-surface px-3.5 py-2 rounded-full text-xs font-semibold active:scale-95">
+          + Créer
+        </button>
+      </div>
+
+      <div id="groupListContainer" class="space-y-2.5">
+        <div onclick="openGroupChat('Studio Noolie')" class="pure-surface p-4 rounded-2xl flex items-center justify-between cursor-pointer active:scale-[0.99]">
+          <div class="flex items-center gap-3.5">
+            <div class="w-11 h-11 rounded-2xl flex items-center justify-center text-base font-semibold" style="background-color: var(--bg-subtle);">
+              S
+            </div>
+            <div>
+              <h3 class="text-sm font-semibold">Studio Noolie</h3>
+              <p class="text-xs mt-0.5" style="color: var(--text-secondary);">Sarah : "On valide l'interface épurée ?"</p>
+            </div>
+          </div>
+          <span class="text-[11px] font-medium px-2.5 py-1 rounded-full" style="background-color: var(--bg-subtle);">3</span>
+        </div>
+
+        <div onclick="openGroupChat('Idées & Design')" class="pure-surface p-4 rounded-2xl flex items-center justify-between cursor-pointer active:scale-[0.99]">
+          <div class="flex items-center gap-3.5">
+            <div class="w-11 h-11 rounded-2xl flex items-center justify-center text-base font-semibold" style="background-color: var(--bg-subtle);">
+              I
+            </div>
+            <div>
+              <h3 class="text-sm font-semibold">Idées & Design</h3>
+              <p class="text-xs mt-0.5" style="color: var(--text-secondary);">Mochi a synthétisé 6 notes vocales</p>
+            </div>
+          </div>
+          <span class="text-[11px]" style="color: var(--text-secondary);">Hier</span>
+        </div>
+      </div>
+
+      <!-- Mini vue interactive de groupe -->
+      <div id="activeGroupBox" class="hidden pure-surface p-4 rounded-2xl space-y-3">
+        <div class="flex items-center justify-between border-b pb-2.5" style="border-color: var(--border-subtle);">
+          <span id="activeGroupTitle" class="text-sm font-semibold">Studio Noolie</span>
+          <button onclick="document.getElementById('activeGroupBox').classList.add('hidden')" class="text-xs" style="color: var(--text-secondary);">Fermer</button>
+        </div>
+        <p class="text-xs leading-relaxed" style="color: var(--text-secondary);">
+          Mochi est actif dans cet espace. Demande-lui de résumer la conversation ou d'envoyer une note au groupe.
+        </p>
+        <button onclick="switchTab('chat'); sendQuickPrompt('Fais le point sur le groupe Studio Noolie')" class="w-full py-2.5 rounded-xl text-xs font-medium active:scale-98" style="background-color: var(--bg-subtle);">
+          Demander un résumé à Mochi
+        </button>
+      </div>
+    </section>
+
+    <!-- ==================== 3. ONGLET APPELS ==================== -->
+    <section id="view-calls" class="tab-view overflow-y-auto no-scrollbar px-5 pt-2 pb-28 space-y-4">
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="text-lg font-bold tracking-tight">Appels</h2>
+          <p class="text-xs" style="color: var(--text-secondary);">Journal vocal récent</p>
+        </div>
+        <button onclick="openCallOverlay('Mochi', true)" class="pure-surface px-3.5 py-2 rounded-full text-xs font-semibold flex items-center gap-1.5 active:scale-95">
+          <span>+ Nouvel appel</span>
+        </button>
+      </div>
+
+      <div class="space-y-2.5">
+        <!-- Appel 1 -->
+        <div class="pure-surface p-3.5 rounded-2xl flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full bg-gray-100 dark:bg-white/5 flex items-center justify-center font-semibold text-sm">
+              M
+            </div>
+            <div>
+              <p class="text-sm font-semibold">Mochi (IA Vocale)</p>
+              <p class="text-xs mt-0.5 text-emerald-600">↗ Sortant • Aujourd'hui, 15:10</p>
+            </div>
+          </div>
+          <button onclick="openCallOverlay('Mochi', true)" class="w-9 h-9 rounded-full bg-gray-100 dark:bg-white/10 flex items-center justify-center active:scale-90">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" />
+            </svg>
+          </button>
+        </div>
+
+        <!-- Appel 2 -->
+        <div class="pure-surface p-3.5 rounded-2xl flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full bg-gray-100 dark:bg-white/5 flex items-center justify-center font-semibold text-sm">
+              S
+            </div>
+            <div>
+              <p class="text-sm font-semibold">Sarah</p>
+              <p class="text-xs mt-0.5 text-emerald-600">↙ Entrant • Hier, 18:45</p>
+            </div>
+          </div>
+          <button onclick="openCallOverlay('Sarah', false)" class="w-9 h-9 rounded-full bg-gray-100 dark:bg-white/10 flex items-center justify-center active:scale-90">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" />
+            </svg>
+          </button>
+        </div>
+
+        <!-- Appel 3 -->
+        <div class="pure-surface p-3.5 rounded-2xl flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full bg-gray-100 dark:bg-white/5 flex items-center justify-center font-semibold text-sm">
+              L
+            </div>
+            <div>
+              <p class="text-sm font-semibold text-red-500">Lucas</p>
+              <p class="text-xs mt-0.5 text-red-400">↙ Manqué • 11 nov., 10:15</p>
+            </div>
+          </div>
+          <button onclick="openCallOverlay('Lucas', false)" class="w-9 h-9 rounded-full bg-gray-100 dark:bg-white/10 flex items-center justify-center active:scale-90">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== 4. ONGLET AMIS ==================== -->
+    <section id="view-friends" class="tab-view overflow-y-auto no-scrollbar px-5 pt-2 pb-28 space-y-4">
+      <div>
+        <h2 class="text-lg font-bold tracking-tight">Amis</h2>
+        <p class="text-xs" style="color: var(--text-secondary);">Connexions directes sans numéro</p>
+      </div>
+
+      <div class="space-y-2.5">
+        <div class="pure-surface p-3.5 rounded-2xl flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="relative">
+              <div class="w-10 h-10 rounded-full bg-gray-100 dark:bg-white/5 flex items-center justify-center font-semibold text-sm">S</div>
+              <span class="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-500 ring-2 ring-white dark:ring-gray-900"></span>
+            </div>
+            <div>
+              <p class="text-sm font-semibold">Sarah</p>
+              <p class="text-xs" style="color: var(--text-secondary);">@sarah • En ligne</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="openCallOverlay('Sarah', false)" class="p-2 rounded-full bg-gray-100 dark:bg-white/10 active:scale-90">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" />
+              </svg>
+            </button>
+            <button onclick="switchTab('chat'); sendQuickPrompt('Écris un message à Sarah')" class="px-3 py-1.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-white/10 active:scale-95">
+              Écrire
+            </button>
+          </div>
+        </div>
+
+        <div class="pure-surface p-3.5 rounded-2xl flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="relative">
+              <div class="w-10 h-10 rounded-full bg-gray-100 dark:bg-white/5 flex items-center justify-center font-semibold text-sm">L</div>
+              <span class="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-gray-300 ring-2 ring-white dark:ring-gray-900"></span>
+            </div>
+            <div>
+              <p class="text-sm font-semibold">Lucas</p>
+              <p class="text-xs" style="color: var(--text-secondary);">@lucas • Hors ligne</p>
+            </div>
+          </div>
+          <button onclick="switchTab('chat'); sendQuickPrompt('Laisse une note vocale pour Lucas')" class="px-3 py-1.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-white/10 active:scale-95">
+            Écrire
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== 5. ONGLET PROFIL ==================== -->
+    <section id="view-profile" class="tab-view overflow-y-auto no-scrollbar px-5 pt-2 pb-28 space-y-4">
+      <div class="pure-surface p-5 rounded-3xl flex items-center gap-4">
+        <div class="w-14 h-14 rounded-full bg-gray-100 dark:bg-white/10 flex items-center justify-center font-bold text-lg">
+          A
+        </div>
+        <div>
+          <h2 class="text-base font-bold">Antoine</h2>
+          <p class="text-xs" style="color: var(--text-secondary);">@antoine • Compte sans téléphone</p>
+        </div>
+      </div>
+
+      <div class="pure-surface rounded-2xl divide-y" style="border-color: var(--border-subtle);">
+        <!-- Personnalité de Mochi -->
+        <div class="p-4 flex items-center justify-between">
+          <div>
+            <p class="text-sm font-semibold">Personnalité de Mochi</p>
+            <p class="text-xs" style="color: var(--text-secondary);">Adapte le style des réponses</p>
+          </div>
+          <button id="personalityBtn" onclick="togglePersonality()" class="px-3.5 py-1.5 rounded-full text-xs font-semibold bg-gray-100 dark:bg-white/10 active:scale-95">
+            Amical
+          </button>
+        </div>
+
+        <!-- Mode Privé -->
+        <div class="p-4 flex items-center justify-between">
+          <div>
+            <p class="text-sm font-semibold">Mode Privé</p>
+            <p class="text-xs" style="color: var(--text-secondary);">Masquer ton activité en ligne</p>
+          </div>
+          <button id="privateSwitch" onclick="togglePrivateMode()" class="w-11 h-6 rounded-full bg-gray-200 dark:bg-white/15 p-0.5 transition-colors flex items-center">
+            <span id="privateKnob" class="w-5 h-5 rounded-full bg-white shadow-xs transition-transform"></span>
+          </button>
+        </div>
+
+        <!-- Thème Clair / Sombre -->
+        <div class="p-4 flex items-center justify-between">
+          <div>
+            <p class="text-sm font-semibold">Apparence</p>
+            <p class="text-xs" style="color: var(--text-secondary);">Basculer entre clair pur et sombre</p>
+          </div>
+          <button id="themeBtn" onclick="toggleDarkMode()" class="px-3.5 py-1.5 rounded-full text-xs font-semibold bg-gray-100 dark:bg-white/10 active:scale-95">
+            Clair pur
+          </button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- BARRE DE NAVIGATION FLOTTANTE À 5 ONGLETS -->
+  <nav class="fixed bottom-3 left-0 right-0 px-4 z-30">
+    <div class="glass-capsule rounded-full p-1.5 flex items-center justify-around max-w-lg mx-auto">
+      <button onclick="switchTab('chat')" id="nav-chat" class="nav-item active flex-1 py-2 rounded-full flex flex-col items-center justify-center gap-0.5">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.9" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z" />
+        </svg>
+        <span class="text-[10px] font-medium">Chat</span>
+      </button>
+
+      <button onclick="switchTab('groups')" id="nav-groups" class="nav-item flex-1 py-2 rounded-full flex flex-col items-center justify-center gap-0.5">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.9" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
+        </svg>
+        <span class="text-[10px] font-medium">Groupes</span>
+      </button>
+
+      <button onclick="switchTab('calls')" id="nav-calls" class="nav-item flex-1 py-2 rounded-full flex flex-col items-center justify-center gap-0.5">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.9" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" />
+        </svg>
+        <span class="text-[10px] font-medium">Appels</span>
+      </button>
+
+      <button onclick="switchTab('friends')" id="nav-friends" class="nav-item flex-1 py-2 rounded-full flex flex-col items-center justify-center gap-0.5">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.9" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+        </svg>
+        <span class="text-[10px] font-medium">Amis</span>
+      </button>
+
+      <button onclick="switchTab('profile')" id="nav-profile" class="nav-item flex-1 py-2 rounded-full flex flex-col items-center justify-center gap-0.5">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.9" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z" />
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+        </svg>
+        <span class="text-[10px] font-medium">Profil</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- OVERLAY APPEL VOCAL ÉPURÉ -->
+  <div id="callOverlay" class="fixed inset-0 z-50 hidden flex-col items-center justify-between py-14 px-6 backdrop-blur-2xl" style="background-color: var(--bg-app);">
+    <div class="text-center">
+      <p class="text-xs font-medium uppercase tracking-widest" style="color: var(--text-secondary);">Appel vocal</p>
+      <h2 id="callName" class="text-2xl font-bold mt-1">Mochi</h2>
+      <p id="callSub" class="text-sm mt-1" style="color: var(--text-secondary);">En ligne • Écoute active</p>
+    </div>
+
+    <!-- Avatar Central -->
+    <div id="callAvatar" class="w-32 h-32 rounded-full pure-surface shadow-md flex items-center justify-center mochi-idle">
+      <svg class="w-20 h-20" viewBox="0 0 100 100" fill="none">
+        <path d="M28 36 C20 18, 36 16, 42 30 Z" fill="#F3F4F6" stroke="#374151" stroke-width="2.8" stroke-linejoin="round"/>
+        <path d="M72 36 C80 18, 64 16, 58 30 Z" fill="#F3F4F6" stroke="#374151" stroke-width="2.8" stroke-linejoin="round"/>
+        <rect x="20" y="26" width="60" height="52" rx="26" fill="#FFFFFF" stroke="#374151" stroke-width="2.8"/>
+        <circle cx="38" cy="49" r="3.8" fill="#111827"/>
+        <circle cx="62" cy="49" r="3.8" fill="#111827"/>
+        <path d="M44 58 Q50 63 56 58" stroke="#374151" stroke-width="2.8" stroke-linecap="round"/>
+      </svg>
+    </div>
+
+    <!-- Réponses vocales rapides à tester -->
+    <div id="callPrompts" class="flex flex-wrap justify-center gap-2 max-w-sm">
+      <button onclick="triggerCallDialogue('briefing')" class="pure-surface px-3.5 py-2 rounded-full text-xs font-medium active:scale-95">
+        "Mon briefing"
+      </button>
+      <button onclick="triggerCallDialogue('idea')" class="pure-surface px-3.5 py-2 rounded-full text-xs font-medium active:scale-95">
+        "Une idée pour Noolie"
+      </button>
+      <button onclick="triggerCallDialogue('sarah')" class="pure-surface px-3.5 py-2 rounded-full text-xs font-medium active:scale-95">
+        "Préviens Sarah"
+      </button>
+    </div>
+
+    <!-- Bouton Raccrocher -->
+    <button onclick="closeCallOverlay()" class="w-16 h-16 rounded-full bg-red-500 text-white shadow-lg flex items-center justify-center active:scale-90 transition">
+      <svg class="w-7 h-7 rotate-[135deg]" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" />
+      </svg>
+    </button>
+  </div>
+
+  <!-- NOTIFICATION DISCRÈTE -->
+  <div id="toast" class="fixed top-16 left-1/2 -translate-x-1/2 glass-capsule px-4 py-2 rounded-full text-xs font-medium opacity-0 pointer-events-none transition-opacity duration-300 z-50">
+    Notification
+  </div>
+
+  <script>
+    // État de l'application
+    let personality = 'Amical';
+    let privateMode = false;
+    let darkMode = false;
+    let recTimer = null;
+    let recSeconds = 0;
+    let lastReplyIndex = {};
+
+    // Base de connaissances riche et contextuelle (évite toute répétition)
+    const aiKnowledge = {
+      greetings: [
+        "Salut ! Ravi de te retrouver. Sur quoi veux-tu qu'on avance ensemble ?",
+        "Coucou ! Je suis tout ouïe. Une idée en tête ou besoin d'un coup de main ?",
+        "Hello ! Ton espace Noolie est calme et prêt. Quelle est ta priorité du moment ?"
+      ],
+      creative: [
+        "Et si on créait une capsule audio quotidienne de 15 secondes dans Studio Noolie pour partager l'avancement sans réunions ?",
+        "Voici une piste : un mode 'Focus Duo' où toi et Sarah partagez un espace blanc minimaliste avec mes synthèses en direct.",
+        "Pourquoi ne pas lancer un défi créatif chaque lundi avec tes amis sur Noolie ? Je peux préparer les thèmes automatiquement."
+      ],
+      sarah: [
+        "C'est noté ! J'ai préparé un message clair pour Sarah : « Salut Sarah, on fait le point sur Studio Noolie dès que tu es dispo ? ». Je l'envoie ?",
+        "Sarah est actuellement en ligne. Je lui transmets ton message tout de suite avec une notification discrète.",
+        "J'ai envoyé une note courte à Sarah pour lui dire que tu es prêt à avancer sur le design."
+      ],
+      mood: [
+        "Prendre une pause de 5 minutes loin des écrans fait toujours du bien. Comment tu te sens là maintenant, plutôt énergique ou posé ?",
+        "Tu as bien avancé aujourd'hui. Souffle un peu, je garde le fil de tes idées en arrière-plan.",
+        "Ton rythme est super régulier cette semaine. Si tu veux, on peut alléger ta liste de tâches pour ce soir."
+      ],
+      tasks: [
+        "Voici tes 3 priorités du moment :\n1. Valider l'interface ultra-épurée de Noolie\n2. Répondre à la note vocale de Sarah\n3. Préparer le point Studio Noolie.",
+        "Tout est sous contrôle : tu as 2 tâches en cours et aucune urgence bloquante pour aujourd'hui.",
+        "Il te reste uniquement la validation des maquettes vocales avec Sarah avant de clôturer ta journée."
+      ],
+      briefing: [
+        "Voici ton briefing : Sarah a laissé une idée dans Studio Noolie, Lucas a tenté de te joindre hier soir, et ton après-midi est dégagé.",
+        "Tout est fluide aujourd'hui ! Deux nouveaux échanges dans tes groupes et un rappel créatif prévu à 17h.",
+        "En résumé : 100 % calme côté notifications, Sarah attend ton retour sur le prototype et tes notes vocales sont classées."
+      ],
+      fallbackFriendly: [
+        "J'aime beaucoup cette approche ! Tu veux qu'on la structure ensemble étape par étape ?",
+        "C'est super clair. Je garde cette note précieusement dans ton espace Noolie. On enchaîne sur quoi ?",
+        "Intéressant ! Dis-moi si tu veux que je transforme ça en tâche ou que je le partage dans Studio Noolie."
+      ],
+      fallbackPro: [
+        "Bien reçu. J'ai enregistré ces éléments et structuré les prochaines étapes. Souhaitez-vous un récapitulatif ?",
+        "Analyse effectuée. Dois-je transmettre cette synthèse directement à Sarah ou au groupe ?",
+        "Parfait. Je reste en veille active pour exécuter vos prochaines instructions."
+      ],
+      fallbackCreative: [
+        "Oh, ça m'inspire une variante encore plus épurée ! Et si on testait ça sous forme d'expérience sonore interactive ?",
+        "Excellente étincelle ! On pourrait combiner cette idée avec les capsules vocales du groupe Idées & Design.",
+        "J'adore la direction que ça prend. Veux-tu que j'explore 3 déclinaisons visuelles ou sonores de cette idée ?"
+      ]
+    };
+
+    function pickNonRepeating(categoryKey) {
+      const arr = aiKnowledge[categoryKey];
+      if (!arr || arr.length === 0) return "";
+      let idx = Math.floor(Math.random() * arr.length);
+      if (arr.length > 1 && lastReplyIndex[categoryKey] === idx) {
+        idx = (idx + 1) % arr.length;
+      }
+      lastReplyIndex[categoryKey] = idx;
+      return arr[idx];
+    }
+
+    // Navigation ultra-fluide entre les 5 onglets
+    function switchTab(tabId) {
+      const views = ['chat', 'groups', 'calls', 'friends', 'profile'];
+      views.forEach(v => {
+        const viewEl = document.getElementById('view-' + v);
+        const navEl = document.getElementById('nav-' + v);
+        if (v === tabId) {
+          viewEl.classList.add('active');
+          navEl.classList.add('active');
+        } else {
+          viewEl.classList.remove('active');
+          navEl.classList.remove('active');
+        }
+      });
+    }
+
+    // Synthèse vocale fluide
+    function speakText(text, onDone) {
+      try {
+        if ('speechSynthesis' in window) {
+          window.speechSynthesis.cancel();
+          const u = new SpeechSynthesisUtterance(text);
+          u.lang = 'fr-FR';
+          u.rate = 1.04;
+          u.onend = () => { if (onDone) onDone(); };
+          window.speechSynthesis.speak(u);
+        } else if (onDone) {
+          setTimeout(onDone, 1800);
+        }
+      } catch (e) {
+        if (onDone) setTimeout(onDone, 1500);
+      }
+    }
+
+    function triggerMochiQuickVoice() {
+      const msg = "Je suis là ! Écris-moi ou appuie sur le micro pour discuter de vive voix.";
+      showToast("Mochi : « Je suis là ! »");
+      speakText(msg);
+    }
+
+    // Gestion des messages et réponses intelligentes variées
+    function handleSendText() {
+      const input = document.getElementById('messageInput');
+      const text = input.value.trim();
+      if (!text) return;
+      input.value = '';
+      processUserMessage(text);
+    }
+
+    function sendQuickPrompt(promptText) {
+      processUserMessage(promptText);
+    }
+
+    function processUserMessage(text) {
+      appendMessage('user', text);
+      showTyping(true);
+
+      const delay = 500 + Math.random() * 400;
+      setTimeout(() => {
+        showTyping(false);
+        const reply = computeSmartReply(text);
+        appendMessage('ai', reply);
+      }, delay);
+    }
+
+    function computeSmartReply(input) {
+      const q = input.toLowerCase();
+      if (q.match(/bonjour|salut|coucou|hello|hey/)) return pickNonRepeating('greetings');
+      if (q.match(/idée|créati|projet|invente|brainstorm/)) return pickNonRepeating('creative');
+      if (q.match(/sarah|message|écris|envoie/)) return pickNonRepeating('sarah');
+      if (q.match(/humeur|sens|fatigue|stress|bien|forme/)) return pickNonRepeating('mood');
+      if (q.match(/tâche|faire|liste|priorité|organisation/)) return pickNonRepeating('tasks');
+      if (q.match(/briefing|résumé|point|nouveau|studio|nova/)) return pickNonRepeating('briefing');
+
+      if (personality === 'Pro') return pickNonRepeating('fallbackPro');
+      if (personality === 'Créatif') return pickNonRepeating('fallbackCreative');
+      return pickNonRepeating('fallbackFriendly');
+    }
+
+    function appendMessage(sender, text) {
+      const container = document.getElementById('messagesContainer');
+      const wrapper = document.createElement('div');
+      wrapper.className = `flex ${sender === 'user' ? 'justify-end' : 'justify-start'} msg-enter`;
+
+      const bubbleClass = sender === 'user'
+        ? 'user-bubble rounded-2xl rounded-tr-sm'
+        : 'ai-bubble rounded-2xl rounded-tl-sm';
+
+      const formatted = escapeHtml(text).replace(/\n/g, '<br>');
+      wrapper.innerHTML = `<div class="${bubbleClass} px-4 py-2.5 max-w-[84%] text-[14px] leading-relaxed">${formatted}</div>`;
+      container.appendChild(wrapper);
+      scrollChatToBottom();
+    }
+
+    function showTyping(visible) {
+      const el = document.getElementById('typingIndicator');
+      const mochi = document.getElementById('headerMochi');
+      const hero = document.getElementById('heroMochi');
+      if (visible) {
+        el.classList.remove('hidden');
+        mochi.classList.add('mochi-speaking');
+        if (hero) hero.classList.add('mochi-speaking');
+      } else {
+        el.classList.add('hidden');
+        mochi.classList.remove('mochi-speaking');
+        if (hero) hero.classList.remove('mochi-speaking');
+      }
+      scrollChatToBottom();
+    }
+
+    function scrollChatToBottom() {
+      const stream = document.getElementById('chatStream');
+      stream.scrollTo({ top: stream.scrollHeight, behavior: 'smooth' });
+    }
+
+    // ==================== ENREGISTREMENT VOCAL ====================
+    function startRecording() {
+      document.getElementById('textBar').classList.add('hidden');
+      document.getElementById('voiceBar').classList.remove('hidden');
+      recSeconds = 1;
+      updateTimerDisplay();
+      recTimer = setInterval(() => {
+        recSeconds++;
+        updateTimerDisplay();
+      }, 1000);
+    }
+
+    function updateTimerDisplay() {
+      const m = Math.floor(recSeconds / 60);
+      const s = recSeconds % 60;
+      document.getElementById('timerLabel').textContent = `${m}:${s < 10 ? '0' : ''}${s}`;
+    }
+
+    function cancelRecording() {
+      clearInterval(recTimer);
+      document.getElementById('voiceBar').classList.add('hidden');
+      document.getElementById('textBar').classList.remove('hidden');
+      showToast("Vocal annulé");
+    }
+
+    function finishRecording() {
+      clearInterval(recTimer);
+      const duration = document.getElementById('timerLabel').textContent;
+      const totalSec = recSeconds;
+      document.getElementById('voiceBar').classList.add('hidden');
+      document.getElementById('textBar').classList.remove('hidden');
+
+      const noteId = 'vn-' + Date.now();
+      const container = document.getElementById('messagesContainer');
+      const wrapper = document.createElement('div');
+      wrapper.className = 'flex justify-end msg-enter';
+      wrapper.innerHTML = `
+        <div class="user-bubble rounded-2xl rounded-tr-sm px-3.5 py-2.5 flex items-center gap-3 min-w-[205px]">
+          <button id="btn-${noteId}" onclick="toggleVoiceNote('${noteId}', ${totalSec})" class="violet-action-btn w-8 h-8 rounded-full flex items-center justify-center shrink-0">
+            <svg class="w-3.5 h-3.5 translate-x-0.5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+          </button>
+          <div class="flex-1 space-y-1">
+            <div class="w-full h-1.5 rounded-full overflow-hidden bg-black/10 dark:bg-white/15">
+              <div id="prog-${noteId}" class="h-full w-0 rounded-full transition-all duration-150" style="background-color: var(--violet-text);"></div>
+            </div>
+            <div class="flex justify-between items-center text-[10px] font-medium opacity-80">
+              <span>Note vocale</span>
+              <span class="tabular-nums">${duration}</span>
+            </div>
+          </div>
+        </div>
+      `;
+      container.appendChild(wrapper);
+      scrollChatToBottom();
+
+      showTyping(true);
+      setTimeout(() => {
+        showTyping(false);
+        const voiceReplies = [
+          "Bien reçu ! J'ai écouté ta note vocale et je l'ai synthétisée dans ton espace.",
+          "Super clair ! Je garde cet enregistrement sous la main pour la suite du projet.",
+          "Message vocal compris à 100 %. Tu veux que je partage ce résumé avec Sarah ?"
+        ];
+        const voiceReply = voiceReplies[Math.floor(Math.random() * voiceReplies.length)];
+        appendMessage('ai', voiceReply);
+        speakText(voiceReply);
+      }, 850);
+    }
+
+    let activeAudioInterval = null;
+    function toggleVoiceNote(noteId, seconds) {
+      const prog = document.getElementById('prog-' + noteId);
+      const btn = document.getElementById('btn-' + noteId);
+      if (!prog || !btn) return;
+
+      if (activeAudioInterval) {
+        clearInterval(activeAudioInterval);
+        activeAudioInterval = null;
+      }
+
+      let elapsed = 0;
+      const maxSteps = Math.max(seconds * 10, 20);
+      btn.innerHTML = `<svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M6 5h4v14H6zm8 0h4v14h-4z"/></svg>`;
+      speakText("Lecture de ta note vocale enregistrée sur Noolie.");
+
+      activeAudioInterval = setInterval(() => {
+        elapsed++;
+        const pct = Math.min(100, (elapsed / maxSteps) * 100);
+        prog.style.width = pct + '%';
+        if (pct >= 100) {
+          clearInterval(activeAudioInterval);
+          activeAudioInterval = null;
+          prog.style.width = '0%';
+          btn.innerHTML = `<svg class="w-3.5 h-3.5 translate-x-0.5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>`;
+        }
+      }, 100);
+    }
+
+    function playVoiceNote() {
+      showToast("Lecture de la note vocale...");
+      speakText("Lecture de ta note vocale enregistrée sur Noolie.");
+    }
+
+    // ==================== OVERLAY APPEL VOCAL ====================
+    function openCallOverlay(name, isMochi) {
+      const overlay = document.getElementById('callOverlay');
+      document.getElementById('callName').textContent = name;
+      document.getElementById('callPrompts').style.display = isMochi ? 'flex' : 'none';
+      overlay.classList.remove('hidden');
+      overlay.classList.add('flex');
+
+      const sub = document.getElementById('callSub');
+      const avatar = document.getElementById('callAvatar');
+
+      if (isMochi) {
+        sub.textContent = "Mochi te salue...";
+        avatar.classList.add('mochi-speaking');
+        speakText("Salut ! Je t'écoute, que puis-je faire pour toi ?", () => {
+          sub.textContent = "En ligne • À toi de parler";
+          avatar.classList.remove('mochi-speaking');
+        });
+      } else {
+        sub.textContent = "Appel en cours...";
+      }
+    }
+
+    function triggerCallDialogue(topic) {
+      const sub = document.getElementById('callSub');
+      const avatar = document.getElementById('callAvatar');
+      let answer = pickRandom(aiKnowledge.briefing);
+      if (topic === 'idea') answer = pickRandom(aiKnowledge.creative);
+      if (topic === 'sarah') answer = pickRandom(aiKnowledge.sarah);
+
+      sub.textContent = "Mochi répond...";
+      avatar.classList.add('mochi-speaking');
+      speakText(answer, () => {
+        sub.textContent = "En ligne • Écoute active";
+        avatar.classList.remove('mochi-speaking');
+      });
+    }
+
+    function closeCallOverlay() {
+      if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+      const overlay = document.getElementById('callOverlay');
+      overlay.classList.add('hidden');
+      overlay.classList.remove('flex');
+      showToast("Appel terminé");
+    }
+
+    // ==================== GROUPES & PROFIL ====================
+    function addNewGroup() {
+      const list = document.getElementById('groupListContainer');
+      const num = list.children.length + 1;
+      const item = document.createElement('div');
+      item.className = 'pure-surface p-4 rounded-2xl flex items-center justify-between cursor-pointer msg-enter';
+      item.onclick = () => openGroupChat(`Espace #${num}`);
+      item.innerHTML = `
+        <div class="flex items-center gap-3.5">
+          <div class="w-11 h-11 rounded-2xl bg-gray-100 dark:bg-white/5 flex items-center justify-center text-base font-semibold">E</div>
+          <div>
+            <h3 class="text-sm font-semibold">Espace #${num}</h3>
+            <p class="text-xs mt-0.5" style="color: var(--text-secondary);">Mochi prêt à collaborer</p>
+          </div>
+        </div>
+        <span class="text-[11px] font-medium px-2.5 py-1 rounded-full bg-gray-100 dark:bg-white/10">Nouveau</span>
+      `;
+      list.prepend(item);
+      showToast("Nouveau groupe créé");
+    }
+
+    function openGroupChat(title) {
+      document.getElementById('activeGroupTitle').textContent = title;
+      document.getElementById('activeGroupBox').classList.remove('hidden');
+    }
+
+    function togglePersonality() {
+      const modes = ['Amical', 'Pro', 'Créatif'];
+      const nextIdx = (modes.indexOf(personality) + 1) % modes.length;
+      personality = modes[nextIdx];
+      document.getElementById('personalityBtn').textContent = personality;
+      showToast(`Ton de Mochi : ${personality}`);
+    }
+
+    function togglePrivateMode() {
+      privateMode = !privateMode;
+      const sw = document.getElementById('privateSwitch');
+      const knob = document.getElementById('privateKnob');
+      const status = document.getElementById('headerStatus');
+      sw.style.backgroundColor = privateMode ? '#111827' : '';
+      knob.style.transform = privateMode ? 'translateX(20px)' : 'translateX(0px)';
+      status.textContent = privateMode ? 'Mode Privé actif • Masqué' : 'Compagnon Noolie • Disponible';
+      showToast(privateMode ? "Mode Privé activé" : "Profil visible");
+    }
+
+    function toggleDarkMode() {
+      darkMode = !darkMode;
+      document.body.classList.toggle('dark-theme', darkMode);
+      document.getElementById('themeBtn').textContent = darkMode ? 'Sombre' : 'Clair pur';
+    }
+
+    function showToast(text) {
+      const t = document.getElementById('toast');
+      t.textContent = text;
+      t.classList.remove('opacity-0');
+      setTimeout(() => t.classList.add('opacity-0'), 2200);
+    }
+
+    function escapeHtml(str) {
+      return str.replace(/[&<>"']/g, m => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+      })[m]);
+    }
+  </script>
+</body>
+</html>
